@@ -81,6 +81,9 @@
       .catch(function () {
         btn.disabled = false;
         errBox.hidden = false;
+        var body = Object.keys(payload).filter(function (k) { return k.charAt(0) !== '_'; })
+          .map(function (k) { return k + ': ' + payload[k]; }).join('\n');
+        $('send-mail').href = 'mailto:' + TO + '?subject=' + encodeURIComponent(payload._subject) + '&body=' + encodeURIComponent(body);
       });
   });
 })();
