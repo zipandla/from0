@@ -50,11 +50,38 @@
       'ご相談内容:',
       f.message.value
     ];
-    var href = 'mailto:' + TO + '?subject=' + encodeURIComponent('【From 0】無料相談のお申し込み') +
-      '&body=' + encodeURIComponent(lines.join('\n'));
-    $('form-wrap').hidden = true;
-    $('done-wrap').hidden = false;
-    window.location.href = href;
+    var btn = this, errBox = $('send-err');
+    errBox.hidden = true;
+    btn.disabled = true;
+    var payload = {
+      _subject: '【From 0】無料相談のお申し込み',
+      _template: 'table',
+      _captcha: 'false',
+      '会社名': f.company.value,
+      'ご担当者名': f.name.value,
+      'メールアドレス': f.email.value,
+      '保存形態': f.storage.value || '未選択',
+      '現在の輸出状況': f.status.value || '未選択',
+      'お知りになった経路': f.source.value || '未選択',
+      'ご紹介者・詳細': f.referral.value || 'なし',
+      'ご相談内容': f.message.value,
+      _replyto: f.email.value
+    };
+    fetch('https://formsubmit.co/ajax/' + TO, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) { return r.json().then(function (d) { return { ok: r.ok && String(d.success) !== 'false', d: d }; }); })
+      .then(function (res) {
+        if (!res.ok) throw new Error('send failed');
+        $('form-wrap').hidden = true;
+        $('done-wrap').hidden = false;
+        window.scrollTo({ top: $('contact').getBoundingClientRect().top + window.pageYOffset - 92, behavior: 'smooth' });
+      })
+      .catch(function () {
+        btn.disabled = false;
+        errBox.hidden = false;
+      });
   });
 })();
 
